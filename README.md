@@ -18,7 +18,7 @@
 
 ---
 
-<video src="assets/hero-video.mov" autoplay loop muted playsinline width="100%"></video>
+![Unscatter demo](assets/hero-video.gif)
 
 ---
 
@@ -76,7 +76,7 @@ Both modes require no browser. The brain grows from wherever you are.
 
 > **Prerequisite for screen recording:** `brew install ffmpeg` — and grant Screen Recording permission in macOS System Preferences on first run.
 
-<video src="assets/menu-bar.mov" autoplay loop muted playsinline width="100%"></video>
+![Menu bar capture](assets/menu-bar.gif)
 
 ---
 
@@ -91,7 +91,7 @@ Both modes require no browser. The brain grows from wherever you are.
 
 - **Knowledge graph** — force-directed graph with 4 overlays: Coverage · Freshness · Connections · Onboarding Path
 
-<video src="assets/graph.mov" autoplay loop muted playsinline width="100%"></video>
+![Knowledge graph](assets/graph.gif)
 
 ---
 
@@ -110,7 +110,7 @@ list_topics()
 → Embeddings, Auth, Deployment, Database, Billing, Email
 ```
 
-<video src="assets/mcp-claude-demo.mov" autoplay loop muted playsinline width="100%"></video>
+![MCP in Claude Desktop](assets/mcp-claude-demo.gif)
 
 Enable it in Claude Desktop under **+ → Connectors → unscatter**:
 
