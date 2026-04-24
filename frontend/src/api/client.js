@@ -1,8 +1,8 @@
 import axios from "axios"
 
-// Docker for Mac proxies IPv6 on port 8000 — always use explicit IPv4.
+// VITE_API_URL is set at build time for deployed environments; falls back to local.
 export const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000",
   timeout: 120000,
 })
 

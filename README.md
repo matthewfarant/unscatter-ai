@@ -123,12 +123,49 @@ Enable it in Claude Desktop under **+ → Connectors → unscatter**:
 Send a text or voice note to your Telegram bot from anywhere. It transcribes, ingests, and confirms — same pipeline as the web UI.
 
 ```
-You:  "We use Fly.io, deploy with `fly deploy` from each service directory"
-Bot:  ✅ Updated deployment note with Fly.io deploy command.
+You:  "We will deploy to Fly.io using fly deploy"
+Bot:  🎙️ Transcribing...
+Bot:  ✅ Updated the deployment note to reflect Fly.io + `fly deploy` as the canonical deploy path.
 
 /ask why do we use pgvector?
 Bot:  pgvector keeps vector search inside Postgres, eliminating a separate managed service...
 ```
+
+![Telegram bot in action](assets/telegram-support.jpeg)
+
+#### Setting up your Telegram bot
+
+**1. Create the bot with BotFather**
+
+Open Telegram and message [@BotFather](https://t.me/BotFather):
+```
+/newbot
+```
+Follow the prompts — choose a name and username. BotFather gives you a token like:
+```
+123456789:AAFxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**2. Get your Telegram user ID**
+
+Message [@userinfobot](https://t.me/userinfobot) — it replies with your numeric user ID (e.g. `987654321`). This is what `TELEGRAM_ALLOWED_USER_IDS` is set to — only you can talk to your bot.
+
+**3. Add to `.env`**
+
+```
+TELEGRAM_BOT_TOKEN=123456789:AAFxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TELEGRAM_ALLOWED_USER_IDS=987654321
+```
+
+Multiple allowed users: comma-separated — `TELEGRAM_ALLOWED_USER_IDS=111,222,333`
+
+**4. Run the bot**
+
+```bash
+venv/bin/python telegram/telegram_bot.py
+```
+
+The bot is now live. Send it a voice note or text from Telegram — it ingests straight into your brain.
 
 ---
 
