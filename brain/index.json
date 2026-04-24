@@ -1,0 +1,678 @@
+{
+  "version": 1,
+  "updated_at": "2026-04-24T05:13:46.244348Z",
+  "notes": {
+    "note_emb001": {
+      "title": "text-embedding-3-small chosen over ada-002",
+      "topics": [
+        "topic_embeddings"
+      ],
+      "type": "decision",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_emb002",
+        "note_emb003"
+      ],
+      "preview": "We use text-embedding-3-small: 5x cheaper than ada-002 with 2% better recall on our QA benchmark."
+    },
+    "note_emb002": {
+      "title": "pgvector HNSW index tuning baseline",
+      "topics": [
+        "topic_embeddings",
+        "topic_database"
+      ],
+      "type": "reference",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_emb001",
+        "note_db001",
+        "note_hnsw42"
+      ],
+      "preview": "pgvector HNSW runs m=16, ef_construction=128, ef_search=100; recall@10 improved 0.91\u21920.96 with no measurable write-latency hit at current scale."
+    },
+    "note_emb003": {
+      "title": "Embedding batch size limit \u2014 2048 tokens per item",
+      "topics": [
+        "topic_embeddings"
+      ],
+      "type": "gotcha",
+      "freshness_score": 0.9,
+      "related_notes": [
+        "note_emb001"
+      ],
+      "preview": "text-embedding-3-small silently truncates inputs over 8191 tokens \u2014 chunk documents before embedding, not after."
+    },
+    "note_emb004": {
+      "title": "Embedding reindex strategy \u2014 nightly incremental, full weekly",
+      "topics": [
+        "topic_embeddings"
+      ],
+      "type": "convention",
+      "freshness_score": 0.85,
+      "related_notes": [
+        "note_emb001",
+        "note_emb002"
+      ],
+      "preview": "We run nightly incremental reindexing (changed docs only) and a full reindex every Sunday 3am UTC to catch drift."
+    },
+    "note_auth001": {
+      "title": "JWT token expiry \u2014 15 min access, 7 day refresh",
+      "topics": [
+        "topic_auth"
+      ],
+      "type": "decision",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_auth002"
+      ],
+      "preview": "Access tokens expire in 15 minutes; refresh tokens expire in 7 days \u2014 matched to legal's session compliance requirement."
+    },
+    "note_auth002": {
+      "title": "Auth middleware order \u2014 rate limiter must run before JWT validation",
+      "topics": [
+        "topic_auth"
+      ],
+      "type": "convention",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_auth001"
+      ],
+      "preview": "Rate limiter middleware must be registered before JWT validation \u2014 otherwise invalid tokens bypass rate limiting."
+    },
+    "note_dep001": {
+      "title": "Deploy to Railway \u2014 Dockerfile + railway up",
+      "topics": [
+        "topic_deployment"
+      ],
+      "type": "decision",
+      "freshness_score": 1.0,
+      "related_notes": [],
+      "preview": "Deployment target is Fly.io; ship with `fly deploy`."
+    },
+    "note_db001": {
+      "title": "Switched from Pinecone to pgvector \u2014 cost + operational simplicity",
+      "topics": [
+        "topic_database",
+        "topic_embeddings"
+      ],
+      "type": "decision",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_emb002",
+        "note_db002"
+      ],
+      "preview": "Replaced Pinecone with pgvector: saves $340/month and fits our sub-500k vector corpus without managed scaling."
+    },
+    "note_db002": {
+      "title": "Postgres connection pooling \u2014 PgBouncer in transaction mode",
+      "topics": [
+        "topic_database"
+      ],
+      "type": "convention",
+      "freshness_score": 0.25,
+      "related_notes": [
+        "note_db001"
+      ],
+      "preview": "PgBouncer in transaction mode caps our Postgres connections at 20 regardless of API pod count."
+    },
+    "note_db003": {
+      "title": "Database migration strategy \u2014 Alembic with zero-downtime column adds",
+      "topics": [
+        "topic_database"
+      ],
+      "type": "convention",
+      "freshness_score": 0.6,
+      "related_notes": [
+        "note_db002"
+      ],
+      "preview": "Always add nullable columns first, backfill in a separate migration, then add NOT NULL constraint."
+    },
+    "note_rl8k2m": {
+      "title": "Rate limiting \u2014 60 req/min per API key via Redis token bucket",
+      "topics": [
+        "topic_auth"
+      ],
+      "type": "decision",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_auth002"
+      ],
+      "preview": "60 req/min per API key via Redis token bucket, burst 10, 429 + Retry-After on limit."
+    },
+    "note_bil001": {
+      "title": "Stripe chosen for billing \u2014 SOC 2 / PCI offload",
+      "topics": [
+        "topic_billing"
+      ],
+      "type": "decision",
+      "freshness_score": 1.0,
+      "related_notes": [],
+      "preview": "Stripe handles billing: chosen to inherit SOC 2/PCI compliance instead of spending ~6 months building our own payment infra."
+    },
+    "note_hnsw42": {
+      "title": "Missing HNSW index caused 400ms vector queries \u2014 always use vector_cosine_ops",
+      "topics": [
+        "topic_embeddings",
+        "topic_database"
+      ],
+      "type": "gotcha",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_emb002",
+        "note_db001"
+      ],
+      "preview": "Vector similarity queries ran at 400ms because the embedding column had only a btree index; adding an HNSW index dropped latency to 8ms."
+    },
+    "note_meta001": {
+      "title": "What Unscatter is and why it exists",
+      "topics": [
+        "topic_meta"
+      ],
+      "type": "reference",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_meta002",
+        "note_meta003"
+      ],
+      "preview": "Unscatter is a local-first AI tool that turns voice, text, and file dumps into a structured, queryable company knowledge base."
+    },
+    "note_meta002": {
+      "title": "How to capture knowledge in Unscatter",
+      "topics": [
+        "topic_meta"
+      ],
+      "type": "reference",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_meta001",
+        "note_meta003"
+      ],
+      "preview": "Three ways to capture: menu bar voice (ambient), web UI capture modal (voice/text/file), or direct text dump."
+    },
+    "note_meta003": {
+      "title": "How to query and export knowledge from Unscatter",
+      "topics": [
+        "topic_meta"
+      ],
+      "type": "reference",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_meta001",
+        "note_meta002"
+      ],
+      "preview": "Browse the wiki, ask the chatbot (it cites sources), explore the graph with 4 overlays, or export topics as Claude Skills."
+    },
+    "note_eml001": {
+      "title": "Resend chosen over SendGrid for transactional email",
+      "topics": [
+        "topic_email"
+      ],
+      "type": "decision",
+      "freshness_score": 1.0,
+      "related_notes": [],
+      "preview": "We use Resend (not SendGrid) for transactional email: cleaner API, usage-based pricing with no monthly minimum, first-class React Email support."
+    },
+    "note_pgto30": {
+      "title": "Postgres statement_timeout \u2014 30s primary, 5m replica for reports",
+      "topics": [
+        "topic_database"
+      ],
+      "type": "convention",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_db002",
+        "note_db003",
+        "note_hnsw42"
+      ],
+      "preview": "Primary Postgres enforces a 30s statement_timeout; long-running reports run on a separate replica with a 5-minute timeout."
+    },
+    "note_cma001": {
+      "title": "Claude Managed Agents \u2014 what it is and core primitives",
+      "topics": [
+        "topic_agents"
+      ],
+      "type": "reference",
+      "freshness_score": 1.0,
+      "related_notes": [],
+      "preview": "Anthropic's Claude Managed Agents (public beta, Apr 8 2026) offers hosted infra for running Claude as an autonomous agent \u2014 no DIY agent loop."
+    },
+    "note_cma002": {
+      "title": "Claude Managed Agents pricing \u2014 $0.08/session-hour + tokens",
+      "topics": [
+        "topic_agents"
+      ],
+      "type": "reference",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_cma001"
+      ],
+      "preview": "Standard Claude token rates plus $0.08 per active session-hour; a 24/7 agent runs ~$58/month in runtime before tokens."
+    },
+    "note_cma003": {
+      "title": "Managed Agents lock-in risk \u2014 Claude-only, key features gated",
+      "topics": [
+        "topic_agents"
+      ],
+      "type": "gotcha",
+      "freshness_score": 1.0,
+      "related_notes": [
+        "note_cma001",
+        "note_cma002"
+      ],
+      "preview": "Managed Agents runs Claude only; the most compelling features (multi-agent, self-eval) are gated research previews \u2014 real vendor lock-in risk."
+    }
+  },
+  "topics": {
+    "topic_embeddings": {
+      "title": "Embeddings",
+      "description": "Embedding models, pgvector index tuning, chunking strategies, and reindexing pipelines",
+      "note_ids": [
+        "note_emb001",
+        "note_emb002",
+        "note_emb003",
+        "note_emb004",
+        "note_db001",
+        "note_hnsw42"
+      ],
+      "coverage_score": 0.85,
+      "subtopics": [
+        "model-selection",
+        "index-tuning",
+        "chunking",
+        "reindexing"
+      ]
+    },
+    "topic_auth": {
+      "title": "Authentication",
+      "description": "JWT token strategy, middleware ordering, session management, and security conventions",
+      "note_ids": [
+        "note_auth001",
+        "note_auth002",
+        "note_rl8k2m"
+      ],
+      "coverage_score": 0.6,
+      "subtopics": [
+        "jwt",
+        "middleware",
+        "rate-limiting"
+      ]
+    },
+    "topic_deployment": {
+      "title": "Deployment",
+      "description": "Fly.io deployment via `fly deploy` for monorepo services, Dockerfile conventions, and CI/CD practices. Migrated off Railway after per-project pricing change.",
+      "note_ids": [
+        "note_dep001"
+      ],
+      "coverage_score": 0.25,
+      "subtopics": [
+        "fly.io",
+        "docker"
+      ]
+    },
+    "topic_database": {
+      "title": "Database",
+      "description": "Postgres configuration, connection pooling, migrations, and pgvector usage",
+      "note_ids": [
+        "note_db001",
+        "note_db002",
+        "note_db003",
+        "note_emb002",
+        "note_hnsw42",
+        "note_pgto30"
+      ],
+      "coverage_score": 0.65,
+      "subtopics": [
+        "connection-pooling",
+        "migrations",
+        "pgvector"
+      ]
+    },
+    "topic_billing": {
+      "title": "Billing",
+      "description": "Payment processing, billing providers, metered usage, invoicing, and PCI/SOC 2 compliance",
+      "note_ids": [
+        "note_bil001"
+      ],
+      "coverage_score": 0.5,
+      "subtopics": []
+    },
+    "topic_meta": {
+      "title": "About Unscatter",
+      "description": "What Unscatter is, how to capture knowledge, how to query and export \u2014 the tool's own documentation.",
+      "note_ids": [
+        "note_meta001",
+        "note_meta002",
+        "note_meta003"
+      ],
+      "coverage_score": 0.9,
+      "subtopics": [
+        "capture",
+        "retrieval",
+        "export"
+      ]
+    },
+    "topic_email": {
+      "title": "Transactional Email",
+      "description": "Transactional email provider, templates, and delivery conventions.",
+      "note_ids": [
+        "note_eml001"
+      ],
+      "coverage_score": 0.5,
+      "subtopics": []
+    },
+    "topic_agents": {
+      "title": "AI Agents & Agent Infrastructure",
+      "description": "Agent frameworks, managed agent platforms, tool orchestration, sandboxing, and multi-agent coordination patterns.",
+      "note_ids": [
+        "note_cma001",
+        "note_cma002",
+        "note_cma003"
+      ],
+      "coverage_score": 0.5,
+      "subtopics": []
+    }
+  },
+  "edges": [
+    {
+      "from": "note_emb001",
+      "to": "note_emb002",
+      "type": "related",
+      "strength": 0.9
+    },
+    {
+      "from": "note_emb001",
+      "to": "note_emb003",
+      "type": "related",
+      "strength": 0.8
+    },
+    {
+      "from": "note_emb001",
+      "to": "note_emb004",
+      "type": "related",
+      "strength": 0.7
+    },
+    {
+      "from": "note_emb002",
+      "to": "note_db001",
+      "type": "related",
+      "strength": 0.85
+    },
+    {
+      "from": "note_db001",
+      "to": "note_db002",
+      "type": "related",
+      "strength": 0.7
+    },
+    {
+      "from": "note_db002",
+      "to": "note_db003",
+      "type": "related",
+      "strength": 0.6
+    },
+    {
+      "from": "note_auth001",
+      "to": "note_auth002",
+      "type": "related",
+      "strength": 0.8
+    },
+    {
+      "from": "note_emb001",
+      "to": "topic:topic_embeddings",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_emb002",
+      "to": "topic:topic_embeddings",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_emb002",
+      "to": "topic:topic_database",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_emb003",
+      "to": "topic:topic_embeddings",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_emb004",
+      "to": "topic:topic_embeddings",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_auth001",
+      "to": "topic:topic_auth",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_auth002",
+      "to": "topic:topic_auth",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_dep001",
+      "to": "topic:topic_deployment",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_db001",
+      "to": "topic:topic_database",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_db001",
+      "to": "topic:topic_embeddings",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_db002",
+      "to": "topic:topic_database",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_db003",
+      "to": "topic:topic_database",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_rl8k2m",
+      "to": "topic:topic_auth",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_rl8k2m",
+      "to": "note_auth002",
+      "type": "related",
+      "strength": 0.85
+    },
+    {
+      "from": "note_rl8k2m",
+      "to": "topic:topic_auth",
+      "type": "belongs_to",
+      "strength": 0.5
+    },
+    {
+      "from": "note_bil001",
+      "to": "topic:topic_billing",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_bil001",
+      "to": "topic:topic_billing",
+      "type": "belongs_to",
+      "strength": 1.0
+    },
+    {
+      "from": "note_emb002",
+      "to": "note_emb004",
+      "type": "related",
+      "strength": 0.6
+    },
+    {
+      "from": "note_dep001",
+      "to": "note_dep001",
+      "type": "contradicts",
+      "strength": 1.0
+    },
+    {
+      "from": "note_hnsw42",
+      "to": "topic:topic_embeddings",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_hnsw42",
+      "to": "topic:topic_database",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_hnsw42",
+      "to": "note_emb002",
+      "type": "related",
+      "strength": 0.9
+    },
+    {
+      "from": "note_hnsw42",
+      "to": "note_db001",
+      "type": "related",
+      "strength": 0.6
+    },
+    {
+      "from": "note_hnsw42",
+      "to": "topic:topic_embeddings",
+      "type": "belongs_to",
+      "strength": 1.0
+    },
+    {
+      "from": "note_hnsw42",
+      "to": "topic:topic_database",
+      "type": "belongs_to",
+      "strength": 1.0
+    },
+    {
+      "from": "note_meta001",
+      "to": "topic:topic_meta",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_meta002",
+      "to": "topic:topic_meta",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_meta003",
+      "to": "topic:topic_meta",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_meta001",
+      "to": "note_meta002",
+      "type": "related",
+      "strength": 0.9
+    },
+    {
+      "from": "note_meta001",
+      "to": "note_meta003",
+      "type": "related",
+      "strength": 0.9
+    },
+    {
+      "from": "note_meta002",
+      "to": "note_meta003",
+      "type": "related",
+      "strength": 0.9
+    },
+    {
+      "from": "note_eml001",
+      "to": "topic:topic_email",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_eml001",
+      "to": "topic:topic_email",
+      "type": "belongs_to",
+      "strength": 1.0
+    },
+    {
+      "from": "note_pgto30",
+      "to": "topic:topic_database",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_pgto30",
+      "to": "topic:topic_database",
+      "type": "belongs_to",
+      "strength": 1.0
+    },
+    {
+      "from": "note_pgto30",
+      "to": "note_hnsw42",
+      "type": "related",
+      "strength": 0.7
+    },
+    {
+      "from": "note_pgto30",
+      "to": "note_db002",
+      "type": "related",
+      "strength": 0.6
+    },
+    {
+      "from": "note_cma001",
+      "to": "topic:topic_agents",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_cma002",
+      "to": "topic:topic_agents",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_cma003",
+      "to": "topic:topic_agents",
+      "type": "belongs_to"
+    },
+    {
+      "from": "note_cma001",
+      "to": "note_cma002",
+      "type": "related",
+      "strength": 0.85
+    },
+    {
+      "from": "note_cma001",
+      "to": "note_cma003",
+      "type": "related",
+      "strength": 0.85
+    },
+    {
+      "from": "note_cma002",
+      "to": "note_cma003",
+      "type": "related",
+      "strength": 0.7
+    },
+    {
+      "from": "note_cma001",
+      "to": "topic:topic_agents",
+      "type": "belongs_to",
+      "strength": 1.0
+    },
+    {
+      "from": "note_cma002",
+      "to": "topic:topic_agents",
+      "type": "belongs_to",
+      "strength": 1.0
+    },
+    {
+      "from": "note_cma003",
+      "to": "topic:topic_agents",
+      "type": "belongs_to",
+      "strength": 1.0
+    }
+  ],
+  "onboarding_path": [
+    "note_dep001",
+    "note_auth001",
+    "note_auth002",
+    "note_db001",
+    "note_emb001"
+  ]
+}
