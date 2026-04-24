@@ -30,8 +30,21 @@ If any single task is taking longer than 20 minutes and blocking the gate, flag 
 - Never block the menu bar UI thread — background thread with `daemon=True` for all ingest work.
 - macOS notifications: use `osascript`, not `rumps.notification()`.
 
+## Dependency hygiene (security)
+Before installing any new package (npm, pip, brew, etc.), check its recent changelog / release notes / GitHub for anything suspicious — supply chain attacks are real. Be especially cautious with: new-to-you packages, recent maintainer changes, abrupt version jumps, typo-squat-prone names. Pin versions (no floating `latest`) and surface anything odd before proceeding.
+
 ## Stack
 - Backend: FastAPI on `localhost:8000`. CORS open for `localhost:5173`.
 - Frontend: React + Vite + shadcn Luma (dark mode, Zinc palette, accent `#8B5CF6`) on `localhost:5173`.
 - Python venv at `./venv` — always use `venv/bin/python` and `venv/bin/uvicorn`.
 - Brain storage: `./brain/` (markdown notes + `index.json`). Never a database.
+
+## Deployment model (decided, do not change)
+Unscatter is a **local-first open source tool** — not a SaaS, not a cloud service.
+- No auth, no multi-tenancy. Single user, localhost only.
+- The menu bar app records from the local mic and talks to localhost — inherently local.
+- Ship as an open source repo. Add `docker-compose.yml` as a convenience wrapper (backend + frontend) so users can `git clone && docker compose up`. Docker is for onboarding ease, not production hosting.
+- Do NOT add auth, cloud storage, or multi-tenancy — that is out of scope and a rewrite.
+
+## Port gotcha
+Docker for Mac may proxy IPv6 on port 8000. Always use `http://127.0.0.1:8000` (explicit IPv4) in curl commands, frontend axios config, and any internal references — never `http://localhost:8000`.
